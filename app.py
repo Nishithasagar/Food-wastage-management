@@ -221,22 +221,27 @@ if page == "📊 Dashboard":
 
     with col7:
         fig = px.pie(
-            expired_data,
-            names='status',
+            status_data,
+            names='Status',
             values='count',
             hole=0.5,
-            title="Expired vs Available Food"
+            title="Claim Status Distribution"
         )
         st.plotly_chart(fig, use_container_width=True)
 
     with col8:
+        expired_counts = food_df["Expiry_Date"].notna().value_counts()
+
         fig = px.pie(
-            expired_data,
-            names='Status',
-            values='count',
+            names=["AVAILABLE", "EXPIRED"],
+            values=[
+                expired_counts.get(True, 0),
+                expired_counts.get(False, 0)
+            ],
             hole=0.5,
             title="Expired vs Available Food"
         )
+
         st.plotly_chart(fig, use_container_width=True)
 
 # ---------------- GEOGRAPHIC ANALYSIS ----------------

@@ -96,7 +96,7 @@ page = st.sidebar.radio(
 st.sidebar.markdown("---")
 st.sidebar.caption("Python . MySQL . Streamlit")
 
-# ---------------- DASHBOARD PAGE ----------------
+# ---------------- DASHBOARD PAGE ---------------- #
 
 if page == "📊 Dashboard":
     st.markdown("""
@@ -271,7 +271,7 @@ if page == "📊 Dashboard":
     with col10:
         st.bar_chart(claim_city_data.set_index("City"))
 
-# ---------------- SQL ANALYSIS PAGE ----------------
+# ---------------- SQL ANALYSIS PAGE ---------------- #
 
 elif page == "🗄️ SQL Analysis":
 
@@ -599,79 +599,125 @@ elif page == "🗄️ SQL Analysis":
         "Top cities with the highest food listings."
         )
 
-# ---------------- EDA PAGE ----------------
+# ---------------- EDA PAGE ---------------- #
 
 elif page == "📈 EDA Analysis":
 
     st.title("📈 Exploratory Data Analysis")
 
-    conn = pymysql.connect(
-        host="localhost",
-        user="root",
-        password="MySQLNEW@18",
-        database="food_wastage_management"
+# ---------------- FOOD TYPE ----------------
+
+    food_type = (
+        food_df["Food_Type"]
+        .value_counts()
+        .reset_index()
     )
 
-    food_type = pd.read_sql("""
-        SELECT food_type, COUNT(*) AS count
-        FROM food_listings
-        GROUP BY food_type
-        """, conn)
+    food_type.columns = [
+        "food_type",
+        "count"
+    ]
 
     st.subheader("🍱 Food Type Distribution")
-    st.bar_chart(food_type.set_index("food_type"))
 
-    meal_type = pd.read_sql("""
-        SELECT meal_type, COUNT(*) AS count
-        FROM food_listings
-        GROUP BY meal_type
-        """, conn)
+    st.bar_chart(
+        food_type.set_index("food_type")
+    )
+
+# ---------------- MEAL TYPE ----------------
+
+    meal_type = (
+        food_df["Meal_Type"]
+        .value_counts()
+        .reset_index()
+    )
+
+    meal_type.columns = [
+        "meal_type",
+        "count"
+    ]
 
     st.subheader("🍽 Meal Type Distribution")
-    st.bar_chart(meal_type.set_index("meal_type"))
 
-    quantity_data = pd.read_sql("""
-        SELECT quantity
-        FROM food_listings
-        """, conn)
+    st.bar_chart(
+        meal_type.set_index("meal_type")
+    )
 
-    st.subheader("📦 Food Quantity Distribution")
-    st.bar_chart(quantity_data)
+# ---------------- QUANTITY ----------------
 
-    provider_type = pd.read_sql("""
-        SELECT type, COUNT(*) AS count
-        FROM providers
-        GROUP BY type
-        """, conn)
+    quantity_data = (
+        food_df[["Quantity"]]
+    )
 
-    st.subheader("🏢 Provider Type Distribution")
-    st.bar_chart(provider_type.set_index("type"))
+    st.subheader(
+        "📦 Food Quantity Distribution"
+    )
 
-    st.subheader("📍 Top Provider Cities")
+    st.bar_chart(
+        quantity_data
+    )
 
-    city_data = pd.read_sql("""
-        SELECT city, COUNT(*) AS count
-        FROM providers
-        GROUP BY city
-        ORDER BY count DESC
-        LIMIT 10
-        """, conn)
+# ---------------- PROVIDER TYPE ----------------
 
-    st.bar_chart(city_data.set_index("city"))
+    provider_type = (
+        providers_df["Type"]
+        .value_counts()
+        .reset_index()
+    )
 
-    st.subheader("🔍 Key Insights")
+    provider_type.columns = [
+        "type",
+        "count"
+    ]
+
+    st.subheader(
+        "🏢 Provider Type Distribution"
+    )
+
+    st.bar_chart(
+        provider_type.set_index("type")
+    )
+
+# ---------------- CITY ----------------
+
+    city_data = (
+        providers_df["City"]
+        .value_counts()
+        .reset_index()
+    )
+
+    city_data.columns = [
+        "city",
+        "count"
+    ]
+
+    city_data = city_data.head(10)
+
+    st.subheader(
+        "📍 Top Provider Cities"
+    )
+
+    st.bar_chart(
+        city_data.set_index("city")
+    )
+
+# ---------------- INSIGHTS ----------------
+
+    st.subheader(
+        "🔍 Key Insights"
+    )
 
     st.info("""
-            • Food donations are concentrated in a few provider categories.
+    • Food donations are concentrated in a few provider categories.
 
-            • Certain food types dominate the listings.
+    • Certain food types dominate the listings.
 
-            • Some cities contribute significantly more donations.
+    • Some cities contribute significantly more donations.
 
-            • Claim activity shows active redistribution of food.
+    • Claim activity shows active redistribution of food.
 
-            • Quantity distribution varies across providers.
-            """)
+    • Quantity distribution varies across providers.
+    """)
 
 # ---------------- FILTER & SEARCH PAGE ----------------
 

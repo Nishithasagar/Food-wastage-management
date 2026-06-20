@@ -199,17 +199,26 @@ if page == "📊 Dashboard":
     status_data = claims_df["Status"].value_counts().reset_index()
     status_data.columns=["Status","count"]
 
-    expired_data = pd.read_sql("""
-        SELECT
-        CASE
-            WHEN STR_TO_DATE(Expiry_Date,'%m/%d/%Y') < CURDATE()
-            THEN 'EXPIRED'
-            ELSE 'AVAILABLE'
-        END AS status,
-        COUNT(*) AS total
-        FROM food_listings
-        GROUP BY status
-        """, conn)
+    food_df["Expiry_Date"] = pd.to_datetime(
+    food_df["Expiry_Date"],
+    errors="coerce"
+    )
+
+    expired_data = food_df.copy()
+
+    expired_data["status"] = expired_data["Expiry_Date"].apply(
+        lambda x: "EXPIRED"
+        if pd.notnull(x) and x < pd.Timestamp.today()
+        else "AVAILABLE"
+    )
+
+    expired_data = (
+        expired_data["status"]
+        .value_counts()
+        .reset_index()
+    )
+
+    expired_data.columns = ["status", "total"]
 
     with col7:
         fig = px.pie(

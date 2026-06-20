@@ -337,12 +337,12 @@ elif page == "🗄️ SQL Analysis":
             .reset_index()
         )
 
-        result.columns=["city","total_providers"]
+         result.columns=["city","total_providers"]
 
-        st.dataframe(result)
-        st.bar_chart(result.set_index("city"))
+         st.dataframe(result)
+         st.bar_chart(result.set_index("city"))
 
-        st.success("Shows cities with the highest number of food providers.")
+         st.success("Shows cities with the highest number of food providers.")
     elif query_option == "Food Type Distribution":
 
         result = (

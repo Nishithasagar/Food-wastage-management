@@ -291,7 +291,11 @@ elif page == "🗄️ SQL Analysis":
             "Provider Type Distribution",
             "Meal Type Distribution",
             "Top Locations by Food Listings",
-            "Claims by Provider City"
+            "Claims by Provider City",
+            "Total Food Quantity by Provider Type",
+            "Average Quantity by Food Type",
+            "Monthly Claims Trend",
+            "Top Cities by Food Listings"
         ]
     )
     if query_option == "Top Providers by Claims":
@@ -532,6 +536,69 @@ elif page == "🗄️ SQL Analysis":
         st.bar_chart(result.set_index("city"))
 
         st.success("Cities generating the highest number of food claims.")
+    elif query_option == "Total Food Quantity by Provider Type":
+
+        result = (
+            providers_df.groupby("Type")
+            .size()
+            .reset_index(name="total_quantity")
+        )
+
+        st.dataframe(result)
+
+        st.bar_chart(
+        result.set_index("Type")
+        )
+
+        st.success(
+        "Total food quantity grouped by provider type."
+        )
+    elif query_option == "Average Quantity by Food Type":
+
+        result = (
+            food_df.groupby("Food_Type")["Quantity"]
+            .mean()
+            .reset_index()
+        )
+
+        result.columns = [
+            "Food_Type",
+            "Average_Quantity"
+        ]
+
+        st.dataframe(result)
+
+        st.bar_chart(
+        result.set_index("Food_Type")
+        )
+
+        st.success(
+        "Average quantity available for each food type."
+        )
+    elif query_option == "Top Cities by Food Listings":
+
+        result = (
+            food_df["Location"]
+            .value_counts()
+            .reset_index()
+        )
+
+        result.columns = [
+            "City",
+            "Total_Listings"
+        ]
+
+        result = result.head(10)
+
+        st.dataframe(result)
+
+        st.bar_chart(
+        result.set_index("City")
+        )
+
+        st.success(
+        "Top cities with the highest food listings."
+        )
 
 # ---------------- EDA PAGE ----------------
 

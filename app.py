@@ -719,59 +719,64 @@ elif page == "📈 EDA Analysis":
     • Quantity distribution varies across providers.
     """)
 
-# ---------------- FILTER & SEARCH PAGE ----------------
+# ---------------- FILTER & SEARCH PAGE ---------------- #
 
 elif page == "🔍 Filter & Search":
 
     st.title("🔍 Filter & Search")
 
-    conn = pymysql.connect(
-        host="localhost",
-        user="root",
-        password="MySQLNEW@18",
-        database="food_wastage_management"
-    )
+# ---------------- SEARCH FOOD ----------------
 
     st.subheader("Search Food")
 
-    food_name = st.text_input("Enter Food Name")
+    food_name = st.text_input(
+        "Enter Food Name"
+    )
 
     if food_name:
-        search_result = pd.read_sql(
-            f"""
-            SELECT *
-            FROM food_listings
-            WHERE Food_Name LIKE '%{food_name}%'
-            """,
-            conn
+
+        search_result = food_df[
+            food_df["Food_Name"]
+            .str.contains(
+                food_name,
+                case=False,
+                na=False
+            )
+        ]
+
+        st.dataframe(
+            search_result
         )
 
-        st.dataframe(search_result)
+# ---------------- FILTER CITY ----------------
 
-    st.subheader("Filter by City")
+    st.subheader(
+        "Filter by City"
+    )
 
-    cities = pd.read_sql(
-        "SELECT DISTINCT city FROM providers ORDER BY city",
-        conn
+    cities = sorted(
+        providers_df["City"]
+        .dropna()
+        .unique()
     )
 
     selected_city = st.selectbox(
         "Select a City",
-        cities["city"]
+        cities
     )
 
-    city_result = pd.read_sql(
-        f"""
-        SELECT *
-        FROM providers
-        WHERE city = '{selected_city}'
-        """,
-        conn
+    city_result = providers_df[
+        providers_df["City"]
+        == selected_city
+    ]
+
+    st.dataframe(
+        city_result
     )
 
-    st.dataframe(city_result)
-
-    csv = city_result.to_csv(index=False)
+    csv = city_result.to_csv(
+        index=False
+    )
 
     st.download_button(
         label="Download Data as CSV",
@@ -780,95 +785,110 @@ elif page == "🔍 Filter & Search":
         mime="text/csv"
     )
 
-    st.subheader("Filter by Food Type")
+# ---------------- FILTER FOOD TYPE ----------------
 
-    food_types = pd.read_sql(
-        "SELECT DISTINCT food_type FROM food_listings ORDER BY food_type",
-        conn
+    st.subheader(
+        "Filter by Food Type"
+    )
+
+    food_types = sorted(
+        food_df["Food_Type"]
+        .dropna()
+        .unique()
     )
 
     selected_food_type = st.selectbox(
         "Select Food Type",
-        food_types["food_type"]
+        food_types
     )
 
-    food_type_result = pd.read_sql(
-        f"""
-        SELECT *
-        FROM food_listings
-        WHERE food_type = '{selected_food_type}'
-        """,
-        conn
+    food_type_result = food_df[
+        food_df["Food_Type"]
+        == selected_food_type
+    ]
+
+    st.dataframe(
+        food_type_result
     )
 
-    st.dataframe(food_type_result)
+# ---------------- FILTER PROVIDER ----------------
 
-    st.subheader("Filter by Provider")
+    st.subheader(
+        "Filter by Provider"
+    )
 
-    providers = pd.read_sql(
-        "SELECT DISTINCT name FROM providers ORDER BY name",
-        conn
+    providers = sorted(
+        providers_df["Name"]
+        .dropna()
+        .unique()
     )
 
     selected_provider = st.selectbox(
         "Select Provider",
-        providers["name"]
+        providers
     )
 
-    provider_result = pd.read_sql(
-        f"""
-        SELECT *
-        FROM providers
-        WHERE name = '{selected_provider}'
-        """,
-        conn
+    provider_result = providers_df[
+        providers_df["Name"]
+        == selected_provider
+    ]
+
+    st.dataframe(
+        provider_result
     )
+#------------------- CRUD Operations -------------------- #
 
-    st.dataframe(provider_result)
-
-    conn.close()
-
-#------------------- CRUD Operations --------------------
-
-if page == "✏️ CRUD Operations":
+elif page == "✏️ CRUD Operations":
 
     st.title("✏️ CRUD Operations")
 
-    conn = pymysql.connect(
-        host="localhost",
-        user="root",
-        password="MySQLNEW@18",
-        database="food_wastage_management"
-    )
+# Initialize session storage
 
-    # CREATE
+    if "food_data" not in st.session_state:
+        st.session_state.food_data = food_df.copy()
+
+# ---------------- CREATE ----------------
+
     st.subheader("➕ Add New Food Listing")
 
-    food_name = st.text_input("Food Name")
-    quantity = st.number_input("Quantity", min_value=1)
+    food_name = st.text_input(
+        "Food Name"
+    )
+
+    quantity = st.number_input(
+        "Quantity",
+        min_value=1
+    )
 
     if st.button("Add Food"):
-        cursor = conn.cursor()
-        cursor.execute("""
-        INSERT INTO food_listings
-        (Food_Name, Quantity)
-        VALUES (%s,%s)
-        """,(food_name, quantity))
 
-        conn.commit()
+        new_row = pd.DataFrame({
+            "Food_Name": [food_name],
+            "Quantity": [quantity]
+        })
 
-        st.success("Food Added Successfully")
+        st.session_state.food_data = pd.concat(
+            [
+                st.session_state.food_data,
+                new_row
+            ],
+            ignore_index=True
+        )
+
+        st.success(
+            "Food Added Successfully"
+        )
+
+# ---------------- UPDATE ----------------
 
     st.markdown("---")
 
-    # UPDATE
-    st.subheader("✏️ Update Food Quantity")
+    st.subheader(
+        "✏️ Update Food Quantity"
+    )
 
-    food_id = st.number_input(
-        "Food ID",
-        min_value=1,
-        step=1,
-        key="update_id"
+    update_name = st.text_input(
+        "Enter Food Name"
     )
 
     new_quantity = st.number_input(
@@ -878,95 +898,98 @@ if page == "✏️ CRUD Operations":
     )
 
     if st.button("Update"):
-        cursor = conn.cursor()
 
-        cursor.execute("""
-        UPDATE food_listings
-        SET Quantity=%s
-        WHERE Food_ID=%s
-        """,(new_quantity, food_id))
+        st.session_state.food_data.loc[
+            st.session_state.food_data["Food_Name"]
+            == update_name,
+            "Quantity"
+        ] = new_quantity
 
-        conn.commit()
+        st.success(
+            "Record Updated"
+        )
 
-        st.success("Record Updated")
+# ---------------- DELETE ----------------
 
     st.markdown("---")
 
-    # DELETE
-    st.subheader("🗑 Delete Food Listing")
+    st.subheader(
+        "🗑 Delete Food Listing"
+    )
 
-    delete_id = st.number_input(
-        "Food ID To Delete",
-        min_value=1,
-        step=1,
-        key="delete_id"
+    delete_name = st.text_input(
+        "Food Name To Delete"
     )
 
     if st.button("Delete"):
-        cursor = conn.cursor()
 
-        cursor.execute("""
-        DELETE FROM food_listings
-        WHERE Food_ID=%s
-        """,(delete_id,))
+        st.session_state.food_data = (
+            st.session_state.food_data[
+                st.session_state.food_data[
+                    "Food_Name"
+                ]
+                != delete_name
+            ]
+        )
 
-        conn.commit()
+        st.success(
+            "Record Deleted"
+        )
 
-        st.success("Record Deleted")
+# ---------------- PREVIEW ----------------
 
-    conn.close()
+    st.markdown("---")
 
-#-------------------------- DATA TABLES ----------------------
+    st.subheader(
+        "📋 Current Data"
+    )
+
+    st.dataframe(
+        st.session_state.food_data
+    )
+
+#-------------------------- DATA TABLES ---------------------- #
 
 elif page == "📋 Data Tables":
 
     st.title("📋 Data Tables")
 
-    conn = pymysql.connect(
-        host="localhost",
-        user="root",
-        password="MySQLNEW@18",
-        database="food_wastage_management"
-    )
-
-    food_df = pd.read_sql(
-        "SELECT * FROM food_listings",
-        conn
-    )
-
-    provider_df = pd.read_sql(
-        "SELECT * FROM providers",
-        conn
-    )
-
-    receiver_df = pd.read_sql(
-        "SELECT * FROM receivers",
-        conn
-    )
-
-    claims_df = pd.read_sql(
-        "SELECT * FROM claims",
-        conn
-    )
-
     tab1, tab2, tab3, tab4 = st.tabs(
-        ["🍱 Food Listings",
-        "🏢 Providers",
-        "🙋 Receivers",
-        "📄 Claims"]
+        [
+            "🍱 Food Listings",
+            "🏢 Providers",
+            "🙋 Receivers",
+            "📄 Claims"
+        ]
     )
+
+# ---------------- FOOD ----------------
 
     with tab1:
-        st.dataframe(food_df)
+        st.dataframe(
+            food_df
+        )
+
+# ---------------- PROVIDERS ----------------
 
     with tab2:
-        st.dataframe(provider_df)
+        st.dataframe(
+            providers_df
+        )
+
+# ---------------- RECEIVERS ----------------
 
     with tab3:
-        st.dataframe(receiver_df)
+        st.dataframe(
+            receivers_df
+        )
+
+# ---------------- CLAIMS ----------------
 
     with tab4:
-        st.dataframe(claims_df)
+        st.dataframe(
+            claims_df
+        )
 
-    conn.close()
+
 

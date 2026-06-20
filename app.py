@@ -3,10 +3,10 @@ import pandas as pd
 import pymysql
 import plotly.express as px
 
-food_df = pd.read_csv("food_listings.csv")
-providers_df = pd.read_csv("providers.csv")
-receivers_df = pd.read_csv("receivers.csv")
-claims_df = pd.read_csv("claims.csv")
+food_df = pd.read_csv("food_listings_data.csv")
+providers_df = pd.read_csv("providers_data.csv")
+receivers_df = pd.read_csv("receivers_data.csv")
+claims_df = pd.read_csv("claims_data.csv")
 
 st.set_page_config(
     page_title="Food Wastage Management",

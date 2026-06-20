@@ -218,15 +218,15 @@ if page == "📊 Dashboard":
         .reset_index()
     )
 
-    expired_data.columns = ["status", "total"]
+    expired_data.columns = ["status", "count"]
 
     with col7:
         fig = px.pie(
-            status_data,
-            names='Status',
+            expired_data,
+            names='status',
             values='count',
             hole=0.5,
-            title="Claim Status Distribution"
+            title="Expired vs Available Food"
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -234,7 +234,7 @@ if page == "📊 Dashboard":
         fig = px.pie(
             expired_data,
             names='Status',
-            values='total',
+            values='count',
             hole=0.5,
             title="Expired vs Available Food"
         )

@@ -294,7 +294,6 @@ elif page == "🗄️ SQL Analysis":
             "Claims by Provider City",
             "Total Food Quantity by Provider Type",
             "Average Quantity by Food Type",
-            "Monthly Claims Trend",
             "Top Cities by Food Listings"
         ]
     )

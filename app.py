@@ -3,6 +3,11 @@ import pandas as pd
 import pymysql
 import plotly.express as px
 
+food_df = pd.read_csv("food_listings.csv")
+providers_df = pd.read_csv("providers.csv")
+receivers_df = pd.read_csv("receivers.csv")
+claims_df = pd.read_csv("claims.csv")
+
 st.set_page_config(
     page_title="Food Wastage Management",
     page_icon="♻️",
@@ -108,34 +113,15 @@ if page == "📊 Dashboard":
         This dashboard provides insights into food donations, providers,
         receivers, claims, and food distribution trends.
         """)
-
-    conn = pymysql.connect(
-        host="localhost",
-        user="root",
-        password="MySQLNEW@18",
-        database="food_wastage_management"
-    )
-
+    
     # KPI Queries
-    food_count = pd.read_sql(
-        "SELECT COUNT(*) AS total FROM food_listings",
-    conn
-    )
+    food_count = len(food_df)
 
-    provider_count = pd.read_sql(
-        "SELECT COUNT(*) AS total FROM providers",
-    conn
-    )
+    provider_count = len(providers_df)
 
-    receiver_count = pd.read_sql(
-        "SELECT COUNT(*) AS total FROM receivers",
-    conn
-    )
+    receiver_count = len(receivers_df)
 
-    claims_count = pd.read_sql(
-        "SELECT COUNT(*) AS total FROM claims",
-    conn
-    )
+    claims_count = len(claims_df)
 
     # KPI Cards
     st.markdown("""
@@ -149,25 +135,25 @@ if page == "📊 Dashboard":
     with col1:
         st.metric(
             label="🍱 Food Listings",
-            value=food_count.iloc[0]["total"]
+            value=food_count
         )
 
     with col2:
         st.metric(
             label="🏢 Providers",
-            value=provider_count.iloc[0]["total"]
+            value=provider_count
         )
 
     with col3:
         st.metric(
             label="🤝 Receivers",
-            value=receiver_count.iloc[0]["total"]
+            value=receiver_count
         )
 
     with col4:
         st.metric(
             label="📄 Claims",
-            value=claims_count.iloc[0]["total"]
+            value=claims_count
         )
 
 # ---------------- DISTRIBUTION ANALYSIS ----------------
@@ -177,22 +163,16 @@ if page == "📊 Dashboard":
 
     col5, col6 = st.columns([1, 1], gap="large")
 
-    food_type = pd.read_sql("""
-        SELECT food_type, COUNT(*) AS count
-        FROM food_listings
-        GROUP BY food_type
-        """, conn)
+    food_type = food_df["Food_Type"].value_counts().reset_index()
+    food_type.columns=["Food_Type","count"]
 
-    provider_type = pd.read_sql("""
-        SELECT type, COUNT(*) AS count
-        FROM providers
-        GROUP BY type
-        """, conn)
+    provider_type = providers_df["Type"].value_counts().reset_index()
+    provider_type.columns=["Type","count"]
 
     with col5:
         fig = px.pie(
             food_type,
-            names='food_type',
+            names='Food_Type',
             values='count',
             hole=0.5,
             title="Food Type Distribution"
@@ -202,7 +182,7 @@ if page == "📊 Dashboard":
     with col6:
         fig = px.pie(
             provider_type,
-            names='type',
+            names='Type',
             values='count',
             hole=0.5,
             title="Provider Type Distribution"
@@ -216,11 +196,8 @@ if page == "📊 Dashboard":
 
     col7, col8 = st.columns([1, 1], gap="large")
 
-    status_data = pd.read_sql("""
-        SELECT status, COUNT(*) AS count
-        FROM claims
-        GROUP BY status
-        """, conn)
+    status_data = claims_df["Status"].value_counts().reset_index()
+    status_data.columns=["Status","count"]
 
     expired_data = pd.read_sql("""
         SELECT
@@ -237,7 +214,7 @@ if page == "📊 Dashboard":
     with col7:
         fig = px.pie(
             status_data,
-            names='status',
+            names='Status',
             values='count',
             hole=0.5,
             title="Claim Status Distribution"
@@ -247,7 +224,7 @@ if page == "📊 Dashboard":
     with col8:
         fig = px.pie(
             expired_data,
-            names='status',
+            names='Status',
             values='total',
             hole=0.5,
             title="Expired vs Available Food"
@@ -261,13 +238,9 @@ if page == "📊 Dashboard":
 
     col9, col10 = st.columns(2)
 
-    city_data = pd.read_sql("""
-        SELECT city, COUNT(*) AS count
-        FROM providers
-        GROUP BY city
-        ORDER BY count DESC
-        LIMIT 10
-        """, conn)
+    city_data = providers_df["City"].value_counts().reset_index()
+    city_data.columns=["City","count"]
+    city_data = city_data.head(10)
 
     claim_city_data = pd.read_sql("""
         SELECT p.city, COUNT(c.claim_id) AS total_claims
@@ -280,14 +253,10 @@ if page == "📊 Dashboard":
         """, conn)
 
     with col9:
-        st.bar_chart(city_data.set_index("city"))
+        st.bar_chart(city_data.set_index("City"))
 
     with col10:
-        st.bar_chart(claim_city_data.set_index("city"))
-
-    conn.close()
-
-
+        st.bar_chart(claim_city_data.set_index("City"))
 
 # ---------------- SQL ANALYSIS PAGE ----------------
 

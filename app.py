@@ -255,15 +255,15 @@ if page == "📊 Dashboard":
     city_data.columns=["City","count"]
     city_data = city_data.head(10)
 
-    claim_city_data = pd.read_sql("""
-        SELECT p.city, COUNT(c.claim_id) AS total_claims
-        FROM providers p
-        JOIN food_listings f ON p.provider_id = f.provider_id
-        JOIN claims c ON f.food_id = c.food_id
-        GROUP BY p.city
-        ORDER BY total_claims DESC
-        LIMIT 10
-        """, conn)
+    claim_city_data = (
+        providers_df["City"]
+        .value_counts()
+        .reset_index()
+    )
+
+    claim_city_data.columns = ["City", "total_claims"]
+
+    claim_city_data = claim_city_data.head(10)
 
     with col9:
         st.bar_chart(city_data.set_index("City"))

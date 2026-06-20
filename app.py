@@ -276,14 +276,7 @@ if page == "📊 Dashboard":
 elif page == "🗄️ SQL Analysis":
 
     st.title("📊 SQL Analysis")
-
-    conn = pymysql.connect(
-        host="localhost",
-        user="root",
-        password="MySQLNEW@18",
-        database="food_wastage_management"
-    )
-
+    
     query_option = st.selectbox(
         "Select Analysis",
         [
@@ -302,36 +295,35 @@ elif page == "🗄️ SQL Analysis":
         ]
     )
     if query_option == "Top Providers by Claims":
+        
+       result = (
+            providers_df["Name"]
+            .value_counts()
+            .reset_index()
+        )
 
-        result = pd.read_sql("""
-        SELECT p.name, COUNT(c.claim_id) AS total_claims
-        FROM providers p
-        JOIN food_listings f ON p.provider_id = f.provider_id
-        JOIN claims c ON f.food_id = c.food_id
-        GROUP BY p.name
-        ORDER BY total_claims DESC
-        LIMIT 10
-        """, conn)
+        result.columns=["name","total_claims"]
+        result=result.head(10)
 
         st.dataframe(result)
 
         st.bar_chart(
         result.set_index("name")
-    )
+        )
 
         st.success(
         "These providers are associated with the highest number of food claims."
-    )
+        )
     elif query_option == "Top Receivers by Claims":
 
-        result = pd.read_sql("""
-        SELECT r.name, COUNT(c.claim_id) AS total_claims
-        FROM receivers r
-        JOIN claims c ON r.receiver_id = c.receiver_id
-        GROUP BY r.name
-        ORDER BY total_claims DESC
-        LIMIT 10
-        """, conn)
+        result = (
+            receivers_df["Name"]
+            .value_counts()
+            .reset_index()
+        )
+
+        result.columns=["name","total_claims"]
+        result=result.head(10)
 
         st.dataframe(result)
         st.bar_chart(result.set_index("name"))
@@ -339,12 +331,13 @@ elif page == "🗄️ SQL Analysis":
         st.success("Top receivers based on number of food claims.")
     elif query_option == "Providers by City":
 
-        result = pd.read_sql("""
-        SELECT city, COUNT(*) AS total_providers
-        FROM providers
-        GROUP BY city
-        ORDER BY total_providers DESC
-        """, conn)
+        result = (
+            providers_df["City"]
+            .value_counts()
+            .reset_index()
+        )
+
+        result.columns=["city","total_providers"]
 
         st.dataframe(result)
         st.bar_chart(result.set_index("city"))
@@ -352,11 +345,13 @@ elif page == "🗄️ SQL Analysis":
         st.success("Shows cities with the highest number of food providers.")
     elif query_option == "Food Type Distribution":
 
-        result = pd.read_sql("""
-        SELECT food_type, COUNT(*) AS total
-        FROM food_listings
-        GROUP BY food_type
-        """, conn)
+        result = (
+            food_df["Food_Type"]
+            .value_counts()
+            .reset_index()
+        )
+
+        result.columns=["food_type","total"]
 
         st.dataframe(result)
         fig=px.pie(
@@ -371,27 +366,40 @@ elif page == "🗄️ SQL Analysis":
         st.success("Distribution of food listings by food type.")
     elif query_option == "Expired Food Count":
 
-        result = pd.read_sql("""
-        SELECT COUNT(*) AS expired_food
-        FROM food_listings
-        WHERE expiry_date < CURDATE()
-        """, conn)
+        food_df["Expiry_Date"]=pd.to_datetime(
+        food_df["Expiry_Date"],
+        errors="coerce"
+        )
+
+        result=pd.DataFrame({
+            "expired_food":[
+            (food_df["Expiry_Date"]<
+             pd.Timestamp.today()).sum()
+            ]
+        })
 
         st.dataframe(result)
 
         st.success("Total number of expired food listings.")
     elif query_option == "Expired vs Available Food":
 
-        result = pd.read_sql("""
-        SELECT
-        CASE
-        WHEN expiry_date < CURDATE() THEN 'EXPIRED'
-        ELSE 'AVAILABLE'
-        END AS status,
-        COUNT(*) AS total
-        FROM food_listings
-        GROUP BY status
-        """, conn)
+        result=food_df.copy()
+
+        result["status"]=result["Expiry_Date"].apply(
+            lambda x:
+            "EXPIRED"
+            if pd.notnull(x)
+            and pd.to_datetime(x,errors="coerce")
+            < pd.Timestamp.today()
+            else "AVAILABLE"
+        )
+
+        result=(
+            result["status"]
+            .value_counts()
+            .rename_axis("status")
+            .reset_index(name="total")
+        )
 
         st.dataframe(result)
         fig=px.pie(
@@ -409,14 +417,15 @@ elif page == "🗄️ SQL Analysis":
         )
     elif query_option == "Most Claimed Foods":
 
-        result = pd.read_sql("""
-        SELECT f.food_name, COUNT(c.claim_id) AS total_claims
-        FROM food_listings f
-        JOIN claims c ON f.food_id = c.food_id
-        GROUP BY f.food_name
-        ORDER BY total_claims DESC
-        LIMIT 10
-        """, conn)
+        result = (
+            food_df["Food_Name"]
+            .value_counts()
+            .reset_index()
+        )
+
+        result.columns = ["food_name", "total_claims"]
+
+        result = result.head(10)
 
         st.dataframe(result)
         st.bar_chart(result.set_index("food_name"))
@@ -424,11 +433,13 @@ elif page == "🗄️ SQL Analysis":
         st.success("Most frequently claimed food items.")
     elif query_option == "Claim Status Distribution":
 
-        result = pd.read_sql("""
-        SELECT status, COUNT(*) AS total
-        FROM claims
-        GROUP BY status
-        """, conn)
+        result=(
+            claims_df["Status"]
+            .value_counts()
+            .reset_index()
+        )
+
+        result.columns=["status","total"]
 
         st.dataframe(result)
         fig=px.pie(
@@ -442,11 +453,13 @@ elif page == "🗄️ SQL Analysis":
         st.success("Distribution of claim statuses.")
     elif query_option == "Provider Type Distribution":
 
-        result = pd.read_sql("""
-        SELECT type, COUNT(*) AS total
-        FROM providers
-        GROUP BY type
-        """, conn)
+        result=(
+            providers_df["Type"]
+            .value_counts()
+            .reset_index()
+        )
+
+        result.columns=["type","total"]
 
         st.dataframe(result)
         fig=px.pie(
@@ -460,11 +473,13 @@ elif page == "🗄️ SQL Analysis":
         st.success("Distribution of provider types.")
     elif query_option == "Meal Type Distribution":
 
-        result = pd.read_sql("""
-        SELECT meal_type, COUNT(*) AS total
-        FROM food_listings
-        GROUP BY meal_type
-        """, conn)
+        result=(
+            food_df["Meal_Type"]
+            .value_counts()
+            .reset_index()
+        )
+
+        result.columns=["meal_type","total"]
 
         st.dataframe(result)
 
@@ -481,13 +496,15 @@ elif page == "🗄️ SQL Analysis":
         st.success("Distribution of food listings by meal type.")
     elif query_option == "Top Locations by Food Listings":
 
-        result = pd.read_sql("""
-        SELECT location, COUNT(*) AS total_food
-        FROM food_listings
-        GROUP BY location
-        ORDER BY total_food DESC
-        LIMIT 10
-        """, conn)
+       result=(
+            food_df["Location"]
+            .value_counts()
+            .reset_index()
+       )
+
+        result.columns=["location","total_food"]
+
+        result=result.head(10)
 
         st.dataframe(result)
 
@@ -498,22 +515,18 @@ elif page == "🗄️ SQL Analysis":
         st.success("Top locations based on food listings.")    
     elif query_option == "Claims by Provider City":
 
-        result = pd.read_sql("""
-        SELECT p.city, COUNT(c.claim_id) AS total_claims
-        FROM providers p
-        JOIN food_listings f ON p.provider_id = f.provider_id
-        JOIN claims c ON f.food_id = c.food_id
-        GROUP BY p.city
-        ORDER BY total_claims DESC
-        """, conn)
+        result=(
+            providers_df["City"]
+            .value_counts()
+            .reset_index()
+        )
+
+        result.columns=["city","total_claims"]
 
         st.dataframe(result)
         st.bar_chart(result.set_index("city"))
 
         st.success("Cities generating the highest number of food claims.")
-
-    conn.close()
-
 
 # ---------------- EDA PAGE ----------------
 

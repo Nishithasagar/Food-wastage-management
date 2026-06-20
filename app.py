@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import pymysql
 import plotly.express as px
 
 food_df = pd.read_csv("food_listings_data.csv")

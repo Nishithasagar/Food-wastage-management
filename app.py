@@ -200,8 +200,8 @@ if page == "📊 Dashboard":
     status_data.columns=["Status","count"]
 
     food_df["Expiry_Date"] = pd.to_datetime(
-    food_df["Expiry_Date"],
-    errors="coerce"
+        food_df["Expiry_Date"],
+        errors="coerce"
     )
 
     expired_data = food_df.copy()
@@ -213,12 +213,11 @@ if page == "📊 Dashboard":
     )
 
     expired_data = (
-        expired_data["status"]
+    expired_data["status"]
         .value_counts()
-        .reset_index()
+        .rename_axis("status")
+        .reset_index(name="count")
     )
-
-    expired_data.columns = ["status", "count"]
 
     with col7:
         fig = px.pie(

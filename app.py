@@ -501,11 +501,11 @@ elif page == "🗄️ SQL Analysis":
         st.success("Distribution of food listings by meal type.")
     elif query_option == "Top Locations by Food Listings":
 
-       result=(
+        result=(
             food_df["Location"]
             .value_counts()
             .reset_index()
-       )
+        )
 
         result.columns=["location","total_food"]
 

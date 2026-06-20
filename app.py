@@ -296,7 +296,7 @@ elif page == "🗄️ SQL Analysis":
     )
     if query_option == "Top Providers by Claims":
         
-       result = (
+        result = (
             providers_df["Name"]
             .value_counts()
             .reset_index()
@@ -331,7 +331,7 @@ elif page == "🗄️ SQL Analysis":
         st.success("Top receivers based on number of food claims.")
     elif query_option == "Providers by City":
 
-        result = (
+         result = (
             providers_df["City"]
             .value_counts()
             .reset_index()

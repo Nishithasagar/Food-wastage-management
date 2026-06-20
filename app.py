@@ -416,7 +416,7 @@ elif page == "🗄️ SQL Analysis":
             "All food items in the dataset have expiry dates in March 2025; therefore, they are currently classified as expired."
         )
     elif query_option == "Most Claimed Foods":
-
+        
         result = (
             food_df["Food_Name"]
             .value_counts()
@@ -428,9 +428,14 @@ elif page == "🗄️ SQL Analysis":
         result = result.head(10)
 
         st.dataframe(result)
-        st.bar_chart(result.set_index("food_name"))
 
-        st.success("Most frequently claimed food items.")
+        st.bar_chart(
+        result.set_index("food_name")
+        )
+
+        st.success(
+        "Most frequently claimed food items."
+        )
     elif query_option == "Claim Status Distribution":
 
         result=(

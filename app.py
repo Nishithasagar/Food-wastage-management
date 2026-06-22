@@ -83,12 +83,14 @@ st.sidebar.markdown("""
 page = st.sidebar.radio(
     "📌 Navigation",
     [
+        "🏠 Project Overview",
         "📊 Dashboard",
         "🗄️ SQL Analysis",
         "📈 EDA Analysis",
         "🔍 Filter & Search",
         "✏️ CRUD Operations",
-        "📋 Data Tables"
+        "📋 Data Tables",
+        "💡 Insights & Recommendations"
     ]
 )
 

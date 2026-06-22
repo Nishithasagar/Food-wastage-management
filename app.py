@@ -97,9 +97,102 @@ page = st.sidebar.radio(
 st.sidebar.markdown("---")
 st.sidebar.caption("Python . MySQL . Streamlit")
 
+#----------------- PROJECT OVERVIEW PAGE -------------
+
+if page == "🏠 Project Overview":
+
+    st.title("🍱 Food Wastage Management System")
+
+    st.caption("Reducing Food Waste Through Efficient Redistribution")
+
+    st.markdown("---")
+
+    st.header("📖 Introduction")
+
+    st.write("""
+        Food wastage is a major challenge affecting both society and the environment.
+        Large quantities of edible food are discarded daily while many people face food insecurity.
+
+        This project aims to connect food providers and receivers through a centralized platform
+        that enables efficient food redistribution and data-driven decision making.
+    """)
+
+    st.header("📈 Project Statistics")
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    col1.metric("Food Listings", "38")
+    col2.metric("Providers", "10")
+    col3.metric("Receivers", "8")
+    col4.metric("Claims", "40")
+
+    st.header("⚠️ Business Problem")
+
+    st.markdown("""
+        - Excess food often goes to waste.
+        - Receivers struggle to identify available food.
+        - Lack of centralized food tracking.
+        - Inefficient food redistribution process.
+    """)
+
+    st.header("🎯 Business Objectives")
+
+    st.markdown("""
+        - Reduce food wastage.
+        - Improve food redistribution.
+        - Connect providers and receivers.
+        - Track food listings and claims.
+        - Generate insights using SQL and EDA.
+    """)
+
+    st.header("✨ Project Features")
+
+    st.markdown("""
+        - Interactive Dashboard
+        - SQL Analysis
+        - Exploratory Data Analysis (EDA)
+        - CRUD Operations
+        - Search & Filter Functionality
+        - Streamlit Cloud Deployment
+    """)
+
+    st.header("🛠️ Technologies Used")
+
+    st.markdown("""
+        - Python
+        - Pandas
+        - MySQL
+        - Streamlit
+        - Plotly
+        - GitHub
+        - Streamlit Community Cloud
+    """)
+
+    st.header("📂 Datasets Used")
+
+    st.markdown("""
+        - Providers Dataset
+        - Receivers Dataset
+        - Food Listings Dataset
+        - Claims Dataset
+    """)
+
+    st.header("🔄 Project Workflow")
+
+    st.markdown("""
+    Data Collection
+    → Data Cleaning
+    → MySQL Database
+    → SQL Analysis
+    → EDA
+    → Dashboard
+    → Deployment
+    """)
+
+
 # ---------------- DASHBOARD PAGE ---------------- #
 
-if page == "📊 Dashboard":
+elif page == "📊 Dashboard":
     st.markdown("""
         <h1 style='font-size:38px;'>
         ♻️ Food Wastage Management Dashboard

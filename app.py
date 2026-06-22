@@ -1085,5 +1085,42 @@ elif page == "📋 Data Tables":
             claims_df
         )
 
+#---------------- Insights & Recommendations -------------
+
+elif page == "💡 Insights & Recommendations":
+
+    st.title("💡 Insights & Recommendations")
+
+    st.header("📊 Key Insights")
+
+    st.markdown("""
+    - Food donations are concentrated in specific food categories.
+    - Certain provider types contribute significantly more food.
+    - Some cities have higher food donation activity than others.
+    - Claim activity shows active food redistribution.
+    - Expired food records highlight the need for timely claims.
+    """)
+
+    st.header("💡 Recommendations")
+
+    st.markdown("""
+    - Increase participation in low-contribution cities.
+    - Introduce expiry alerts for food listings.
+    - Encourage more providers to register.
+    - Improve matching between providers and receivers.
+    - Use dashboard insights to optimize redistribution.
+    """)
+
+    st.header("✅ Conclusion")
+
+    st.write("""
+    The Food Wastage Management System successfully demonstrates how SQL analysis,
+    Pandas-based EDA, and interactive dashboards can be used to reduce food wastage
+    and improve food redistribution.
+
+    The deployed Streamlit application provides an accessible platform for monitoring
+    food donation activities and generating meaningful business insights.
+    """)
+
 
 
